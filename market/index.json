@@ -1,0 +1,94 @@
+{
+  "format": 1,
+  "title": {
+    "en": "eppen · DSH plugins",
+    "zh": "eppen · DSH 插件"
+  },
+  "description": {
+    "en": "Plugins for DeepSeek Harness by eppen.",
+    "zh": "eppen 维护的 DeepSeek Harness 插件。"
+  },
+  "metadata": {
+    "categories": {
+      "tools": {
+        "title": {
+          "en": "Tools",
+          "zh": "工具"
+        }
+      }
+    },
+    "labels": {
+      "plan": {
+        "title": {
+          "en": "Plan",
+          "zh": "计划"
+        }
+      },
+      "cursor": {
+        "title": {
+          "en": "Cursor",
+          "zh": "Cursor"
+        }
+      },
+      "read-only": {
+        "title": {
+          "en": "Read-only",
+          "zh": "只读"
+        }
+      }
+    }
+  },
+  "plugins": [
+    {
+      "name": "dsh-plugin-cursor-plan",
+      "title": {
+        "en": "Cursor Plan",
+        "zh": "Cursor 计划"
+      },
+      "description": {
+        "en": "DeepSeek Harness plugin: read Cursor Plan mode plans (*.plan.md) via a read-only cursor_plan tool",
+        "zh": "以只读的 cursor_plan 工具读取 Cursor Plan 模式产出的 *.plan.md 计划文件。"
+      },
+      "icon": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCIgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0Ij4KICA8cmVjdCB4PSIzIiB5PSIzIiB3aWR0aD0iNTgiIGhlaWdodD0iNTgiIHJ4PSIxNCIgZmlsbD0iIzFmMjQzMCIvPgogIDxyZWN0IHg9IjE3IiB5PSIxMiIgd2lkdGg9IjMwIiBoZWlnaHQ9IjQwIiByeD0iNSIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjOGZiM2ZmIiBzdHJva2Utd2lkdGg9IjMiLz4KICA8cGF0aCBkPSJNMjQgMjRoMTZNMjQgMzJoMTZNMjQgNDBoOSIgc3Ryb2tlPSIjOGZiM2ZmIiBzdHJva2Utd2lkdGg9IjMiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPgogIDxwYXRoIGQ9Ik0zNyAzNGwxMSAxMS00LjYgMS40TDQxIDUxeiIgZmlsbD0iI2ZmZDE2NiIgc3Ryb2tlPSIjMWYyNDMwIiBzdHJva2Utd2lkdGg9IjEuNiIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPgo8L3N2Zz4K",
+      "author": "eppen",
+      "homepage": "https://github.com/eppen/dsh-plugin-cursor-plan#readme",
+      "repository": {
+        "url": "https://github.com/eppen/dsh-plugin-cursor-plan"
+      },
+      "metadata": {
+        "category": "tools",
+        "labels": [
+          "plan",
+          "cursor",
+          "read-only"
+        ]
+      },
+      "versions": [
+        {
+          "version": "0.1.1",
+          "publishTimestamp": 1795054435,
+          "source": {
+            "type": "git",
+            "url": "https://github.com/eppen/dsh-plugin-cursor-plan.git",
+            "commit": "eaf20d6513fda9d4ec90b8d58854c1948b7cfc5b"
+          },
+          "engines": {
+            "dsh": ">=0.1.0-rc.0"
+          }
+        },
+        {
+          "version": "0.1.0",
+          "publishTimestamp": 1795053609,
+          "source": {
+            "type": "git",
+            "url": "https://github.com/eppen/dsh-plugin-cursor-plan.git",
+            "commit": "2d21a8894bec6b316c4f0b90c150c24ec0d1d9d4"
+          },
+          "engines": {
+            "dsh": ">=0.1.0-rc.0"
+          }
+        }
+      ]
+    }
+  ]
+}
