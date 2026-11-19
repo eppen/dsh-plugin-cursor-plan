@@ -19,7 +19,8 @@ const MAX_BODY_CHARS = 20000;   // 渲染时截断，避免超长计划把上下
 
 const DESCRIPTION = [
   'Read Cursor Plan-mode plans stored as *.plan.md files (read-only; never writes).',
-  'Sources: "~/.cursor/plans" (scope=home) and "<cwd>/.cursor/plans" (scope=workspace).',
+  'Sources: "~/.cursor/plans" (scope=home) and "<session-cwd>/.cursor/plans" (scope=workspace);',
+  'when the Session working directory is unavailable, the dsh launch directory is used.',
   'Each plan is Markdown with an optional YAML frontmatter carrying name, overview and',
   'todos[{id, content, status}] (status: pending | in_progress | completed | cancelled).',
   'The frontmatter todos are the authoritative checklist; the body is the full plan.',
@@ -40,7 +41,7 @@ const PARAMETERS = {
     },
     file: {
       type: 'string',
-      description: 'read 时可用：计划的绝对路径，必须位于 ~/.cursor/plans 或 <cwd>/.cursor/plans 之内'
+      description: 'read 时可用：计划的绝对路径，必须位于 ~/.cursor/plans 或当前会话工作目录的 .cursor/plans 之内'
     },
     basename: {
       type: 'string',
@@ -113,13 +114,42 @@ const OUTPUT_SCHEMA = {
 
 // ── 路径与参数 ───────────────────────────────────────────────────────────────
 
-function searchRoots() {
-  // roots(home, root): [~/.cursor/plans, <cwd>/.cursor/plans]
-  return planRoots(os.homedir(), process.cwd()).filter(function (d) { return !!d; });
+// 计划来源根目录：~/.cursor/plans + 当前会话工作目录下的 .cursor/plans。
+// 会话目录来自 dsh 的 workingDirectory 服务；取不到时（程序化直接调用、服务未挂载、
+// 目录不可用）回落到 dsh 进程启动目录 process.cwd()。
+function getService(ctx, serviceName) {
+  try {
+    return ctx && typeof ctx.get === 'function' ? ctx.get(serviceName) : undefined;
+  } catch (e) {
+    return undefined;
+  }
 }
 
-function resolveRoots() {
-  return searchRoots().map(function (d) { return path.resolve(d); });
+async function workspaceRootOf(ctx, exec) {
+  const service = getService(ctx, 'workingDirectory');
+  const agent = exec && exec.agent;
+  if (service && typeof service.ensure === 'function' && agent) {
+    try {
+      const dir = await service.ensure(agent, exec.signal);
+      if (typeof dir === 'string' && dir.trim()) { return dir; }
+    } catch (e) { /* 会话目录不可用：回落 */ }
+  }
+  return process.cwd();
+}
+
+// 去重后的来源目录：home 与 workspace 指向同一目录时只留一份（Linux 大小写敏感，不合并）
+function planDirs(workspaceRoot) {
+  const seen = new Set();
+  const out = [];
+  const dirs = planRoots(os.homedir(), workspaceRoot).filter(function (d) { return !!d; });
+  for (let i = 0; i < dirs.length; i++) {
+    const abs = path.resolve(dirs[i]);
+    const key = process.platform === 'win32' ? abs.toLowerCase() : abs;
+    if (seen.has(key)) { continue; }
+    seen.add(key);
+    out.push(abs);
+  }
+  return out;
 }
 
 function isInside(file, dirs) {
@@ -152,11 +182,11 @@ function fmtTime(ms) {
 
 // ── list ─────────────────────────────────────────────────────────────────────
 
-function doList(args) {
+function doList(args, workspaceRoot) {
   const limit = asLimit(args.limit);
   const match = str(args.match).trim().toLowerCase();
-  const dirs = searchRoots();
-  const all = listPlans({ home: os.homedir(), root: process.cwd() });
+  const dirs = planDirs(workspaceRoot);
+  const all = listPlans({ home: os.homedir(), root: workspaceRoot });
   const hit = match
     ? all.filter(function (p) {
       return (p.name + '\n' + p.overview + '\n' + p.base).toLowerCase().includes(match);
@@ -193,8 +223,8 @@ function pickByBasename(basename, all) {
   });
 }
 
-function doRead(args) {
-  const dirs = resolveRoots();
+function doRead(args, workspaceRoot) {
+  const dirs = planDirs(workspaceRoot);
   const file = str(args.file).trim();
   const basename = str(args.basename).trim();
   if (!file && !basename) {
@@ -211,7 +241,7 @@ function doRead(args) {
     }
     target = path.resolve(file);
   } else {
-    const hits = pickByBasename(basename, listPlans({ home: os.homedir(), root: process.cwd() }));
+    const hits = pickByBasename(basename, listPlans({ home: os.homedir(), root: workspaceRoot }));
     if (!hits.length) {
       return { action: 'read', error: 'not-found', message: '找不到计划：' + basename };
     }
@@ -324,24 +354,33 @@ function render(args, value) {
 
 // ── 工具定义 ─────────────────────────────────────────────────────────────────
 
-export const cursorPlanTool = {
-  name: TOOL_NAME,
-  description: DESCRIPTION,
-  parameters: PARAMETERS,
-  output: { schema: OUTPUT_SCHEMA, render: render },
-  async execute(args) {
-    const a = args && typeof args === 'object' ? args : {};
-    const action = str(a.action).trim();
-    if (action === 'list') { return doList(a); }
-    if (action === 'read') { return doRead(a); }
-    return {
-      action: action || '(missing)',
-      error: 'bad-action',
-      message: 'action 必须是 "list" 或 "read"'
-    };
-  }
-};
+async function executeTool(args, exec, ctx) {
+  const a = args && typeof args === 'object' ? args : {};
+  const action = str(a.action).trim();
+  if (action === 'list') { return doList(a, await workspaceRootOf(ctx, exec)); }
+  if (action === 'read') { return doRead(a, await workspaceRootOf(ctx, exec)); }
+  return {
+    action: action || '(missing)',
+    error: 'bad-action',
+    message: 'action 必须是 "list" 或 "read"'
+  };
+}
+
+function defineTool(ctx) {
+  return {
+    name: TOOL_NAME,
+    description: DESCRIPTION,
+    parameters: PARAMETERS,
+    output: { schema: OUTPUT_SCHEMA, render: render },
+    execute(args, exec) {
+      return executeTool(args, exec, ctx);
+    }
+  };
+}
+
+// 供直接 import 使用（README 里的自测片段）；没有宿主 ctx 时按 process.cwd() 找 workspace
+export const cursorPlanTool = defineTool(undefined);
 
 export function apply(ctx) {
-  return ctx.tools.register(cursorPlanTool);
+  return ctx.tools.register(defineTool(ctx));
 }
