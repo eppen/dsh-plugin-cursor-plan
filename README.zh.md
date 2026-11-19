@@ -127,7 +127,7 @@ npm run check:index     # 离线逐条检查 format 1 规则
 | GitHub Pages（仓库 Settings → Pages） | `https://eppen.github.io/dsh-plugin-cursor-plan/market/index.json` |
 | 自有站点 / 对象存储 | 任何能返回 `market/index.json` 的 https 地址 |
 
-dsh 给一个索引源只有 15 秒，能走 CDN 就别用慢源。打 tag 后 URL 可钉版本：`.../@v0.1.1/market/index.json`。
+dsh 给一个索引源只有 15 秒，能走 CDN 就别用慢源。打 tag 后 URL 可钉版本：`.../@v0.1.2/market/index.json`（从 `v0.1.2` 起，`market/index.json` 也进了该版本自己的源码树，装下去拿到的 commit 里就带着它发布时的那份索引）。
 
 ### 用户侧
 

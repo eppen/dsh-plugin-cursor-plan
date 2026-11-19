@@ -127,7 +127,7 @@ The icon is inlined as a ~0.5 KB `data:` URL, so the index is a single self-cont
 | GitHub Pages (repo Settings → Pages) | `https://eppen.github.io/dsh-plugin-cursor-plan/market/index.json` |
 | your own site / object store | any https URL serving `market/index.json` |
 
-dsh gives an index source only 15 seconds, so prefer a CDN over a slow origin. Tags make the URL pinnable: `.../@v0.1.1/market/index.json`.
+dsh gives an index source only 15 seconds, so prefer a CDN over a slow origin. Tags make the URL pinnable: `.../@v0.1.2/market/index.json` (from `v0.1.2` on, `market/index.json` is also inside the version's own source tree, so an install resolves to a commit that ships the index it was published with).
 
 ### User side
 
