@@ -1,6 +1,6 @@
 {
   "name": "dsh-plugin-cursor-plan",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "type": "module",
   "description": "DeepSeek Harness plugin: read Cursor Plan mode plans (*.plan.md) via a read-only cursor_plan tool",
   "keywords": [
@@ -34,6 +34,7 @@
     "lib/",
     "locale/",
     "cordis.patch.yml",
+    "market/",
     "README.md",
     "README.zh.md"
   ],
@@ -43,7 +44,9 @@
     }
   },
   "scripts": {
-    "test": "node --test test/"
+    "test": "node --test test/",
+    "build:index": "node scripts/build-index.mjs",
+    "check:index": "node scripts/check-index.mjs market/index.json"
   },
   "engines": {
     "node": ">=20",

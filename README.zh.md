@@ -95,33 +95,51 @@ roots: C:\Users\<你>\.cursor\plans | D:\work\proj\.cursor\plans
 
 ## 发布到插件市场
 
-dsh 的插件市场（Web UI 的 **Discover** 标签页）是**插件索引**（plugin index）机制：一个 UTF-8 JSON 文件，列出可安装 bundle 的标题、图标、作者、版本，由任意静态站点托管。没有官方统一市场，索引由社区 / 团队自行发布。
+dsh **没有官方市场**。Web UI 的 **Discover** 标签页只列用户自己添加的**索引源**——官方文档 `docs/user/guide/plugin-market.md` 原话："DSH ships no index source"。插件索引就是一份 UTF-8 JSON（**format 1**），列出可安装 bundle 的标题、图标、作者与版本，由任意静态站点托管。官方 README 唯一给出的可发现性渠道，是**单数**的 `dsh-plugin` GitHub topic。
 
-本包已按市场要求配好：
+本包两条渠道都配好了：
 
-- `package.json` 声明 `dsh.bundle.patch`（市场生成器只收录声明了 bundle 的包）
-- 未设 `"private": true`（git 源包设了会被生成器跳过）
+- `package.json` 声明了 `dsh.bundle.patch`，且**没有** `"private": true`（生成器会跳过设了它的 git 源包）
 - `engines.dsh` 声明兼容范围
-- `locale/en.json` / `locale/zh.json` 提供市场卡片的标题与描述
-- `keywords` 供 Discover 搜索
-- `README.md`（英文）/ `README.zh.md`（中文）双语文档
+- `locale/en.json` / `locale/zh.json` 提供市场卡片标题与描述
+- `market/index.json` 是可直接托管的 format 1 索引；仓库已带 `dsh-plugin` topic
 
-发布步骤：
+### 本仓库的索引
 
-1. **推到 GitHub**（公开仓库）：`git init` → `git remote add origin https://github.com/eppen/dsh-plugin-cursor-plan.git` → push
-2. **给仓库加 `dsh-plugin` topic**（官方 README 的可发现性机制）
-3. **打版本 tag**：git 源包的版本来自 `vX.Y.Z` / `X.Y.Z` / `@X.Y.Z` tag 与默认分支
-4. **生成索引**：用官方参考生成器（deepseek-harness 仓库内 `apps/plugin-market-generator`）：
+`market/index.json` 由 `package.json` + git tag 生成：
 
-   ```sh
-   # plugins.txt 里一行一个来源
-   echo "https://github.com/eppen/dsh-plugin-cursor-plan" > plugins.txt
-   pnpm --filter @deepseek-ai/dsh-plugin-market-generator start \
-     --input plugins.txt --output site/index.json --title "My DSH plugins"
-   ```
+```bash
+npm run build:index     # node scripts/build-index.mjs
+npm run check:index     # 离线逐条检查 format 1 规则
+```
 
-   或手写 `index.json`（`format: 1`，`source.type: "git"`，`commit` 为 40 位 sha），放到任意 https 静态托管（GitHub Pages / 对象存储等）
-5. **用户侧**：Web UI → Plugins → 开启实验项 **Custom plugin indexes** → Discover → Add index source 填索引 URL，即可浏览、确认、安装
+每个版本都钉在 40 位 commit 上（`source.type: "git"`），安装规格是 `git+https://github.com/eppen/dsh-plugin-cursor-plan.git#<commit>`。**打完 tag 再生成索引，不要反过来**——否则某个版本会指向一份 `package.json` 还是旧版本号的 commit。
+
+`npm run check:index` 只是官方规则的本地实现；真正的校验器（`@deepseek-ai/dsh-plugin-market-index`）在 dsh 的 `app.asar` 里跑，端到端确认只有一条：在 Discover 里加 URL 看能不能列出来。本索引已用该包的 `parseMarketIndex` 验过。
+
+### 托管
+
+图标内联为约 0.5 KB 的 `data:` URL，所以索引是自包含的单个文件，任意静态托管都行：
+
+| 托管方式 | 加为索引源的 URL |
+|---|---|
+| jsDelivr 直读 GitHub（免配置） | `https://cdn.jsdelivr.net/gh/eppen/dsh-plugin-cursor-plan@main/market/index.json` |
+| GitHub Pages（仓库 Settings → Pages） | `https://eppen.github.io/dsh-plugin-cursor-plan/market/index.json` |
+| 自有站点 / 对象存储 | 任何能返回 `market/index.json` 的 https 地址 |
+
+dsh 给一个索引源只有 15 秒，能走 CDN 就别用慢源。打 tag 后 URL 可钉版本：`.../@v0.1.1/market/index.json`。
+
+### 用户侧
+
+1. Plugins → **Experimental plugins** → 开启 **Custom plugin indexes**
+2. **Discover** → **Add index source** → 粘贴上面的 URL
+3. 选卡片 → **Install** → 确认来源 → 重启 `dsh web`
+
+### 其他渠道
+
+- **`dsh-plugin` topic**（单数——官方 README 要的不是复数的 `dsh-plugins`）。所有自动扫描器读的是它；npm 的 `keywords` **不会**替你设置 GitHub topic。
+- **[`awesome-dsh-plugin`](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin)**：多数市场消费的策展列表，`dsh-market` / `dshmarket` 只读它的 `plugins.json`、其它来源一律拒绝，所以想进这些市场只能走这里。投稿 = 一个 PR 加 `data/plugins/<owner>__<repo>.yml`（不要往市场应用仓库提条目）。
+- 另有一批市场实时扫 `topic:dsh-plugin`，无需任何投稿。
 
 ## 本地开发 / 自测
 
