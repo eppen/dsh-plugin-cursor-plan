@@ -65,6 +65,18 @@
       },
       "versions": [
         {
+          "version": "0.1.2",
+          "publishTimestamp": 1795054666,
+          "source": {
+            "type": "git",
+            "url": "https://github.com/eppen/dsh-plugin-cursor-plan.git",
+            "commit": "61e2a03e603eb61c796b490ea83019e8c03e1196"
+          },
+          "engines": {
+            "dsh": ">=0.1.0-rc.0"
+          }
+        },
+        {
           "version": "0.1.1",
           "publishTimestamp": 1795054435,
           "source": {
