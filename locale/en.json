@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Cursor Plan Reader",
+    "description": "Read-only cursor_plan tool for DeepSeek Harness: list and read Cursor Plan-mode plans (*.plan.md) from ~/.cursor/plans and <cwd>/.cursor/plans."
+  }
+}

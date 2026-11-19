@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Cursor 计划读取器",
+    "description": "给 DeepSeek Harness 的只读 cursor_plan 工具：列出 / 读取 Cursor Plan 模式产出的 *.plan.md 计划文件（~/.cursor/plans 与 <cwd>/.cursor/plans）。"
+  }
+}

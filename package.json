@@ -1,0 +1,52 @@
+{
+  "name": "dsh-plugin-cursor-plan",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "DeepSeek Harness plugin: read Cursor Plan mode plans (*.plan.md) via a read-only cursor_plan tool",
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "deepseek-harness",
+    "cordis",
+    "cursor",
+    "plan",
+    "plan-mode",
+    "read-only"
+  ],
+  "author": "eppen",
+  "license": "MIT",
+  "homepage": "https://github.com/eppen/dsh-plugin-cursor-plan#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/eppen/dsh-plugin-cursor-plan.git"
+  },
+  "main": "index.mjs",
+  "exports": {
+    ".": "./index.mjs",
+    "./plan-store": "./lib/plan-store.mjs",
+    "./locale/en.json": "./locale/en.json",
+    "./locale/zh.json": "./locale/zh.json",
+    "./cordis.patch.yml": "./cordis.patch.yml",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "index.mjs",
+    "lib/",
+    "locale/",
+    "cordis.patch.yml",
+    "README.md",
+    "README.zh.md"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  },
+  "scripts": {
+    "test": "node --test test/"
+  },
+  "engines": {
+    "node": ">=20",
+    "dsh": ">=0.1.0-rc.0"
+  }
+}

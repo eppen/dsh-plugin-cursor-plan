@@ -1,0 +1,15 @@
+# The dsh-plugin-cursor-plan bundle patch: applied as a bundle layer when the
+# package is installed into a dsh profile (dsh plugin --profile <name> add ...).
+#
+# `name` is the package name: the plugin lives in the profile's node_modules
+# after install, so the loader resolves it as a bare specifier through the
+# package's main/exports to index.mjs.
+#
+# The user's profile cordis.patch.yml is applied AFTER this layer; a row with
+# the same id there wins (last write wins per row). If you previously mounted
+# this plugin manually with a file:/// entry, remove that insert once the
+# bundle install is in place.
+
+- insert:
+    - id: cursor-plan
+      name: 'dsh-plugin-cursor-plan'
