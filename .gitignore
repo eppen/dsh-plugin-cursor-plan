@@ -1,4 +1,5 @@
 node_modules/
 *.log
 tmp-*.log
+.tmp-*.ps1
 d:Toolsdsh-plugin-cursor-plan.tmp-npm.log
